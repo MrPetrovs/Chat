@@ -45,6 +45,19 @@ public class Server {
                 }
             }
         }
+
+        private void serverMainLoop(Connection connection, String userName) throws IOException, ClassNotFoundException {
+            while (true) {
+                Message messageReceived = connection.receive();
+
+                if (messageReceived.getType() == MessageType.TEXT) {
+                    Message messageToSend = new Message(MessageType.TEXT, userName + ": " + messageReceived.getData());
+                    sendBroadcastMessage(messageToSend);
+                }else {
+                    ConsoleHelper.writeMessage("Ошибка! Тип сообщения должен быть TEXT!");
+                }
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException {
