@@ -61,7 +61,7 @@ public class Server {
 
         public void run() {
             ConsoleHelper.writeMessage(socket.getRemoteSocketAddress().toString());
-            try (Connection connection = new Connection(socket)) {
+            try (Connection connection = new Connection(socket);) {
 
                 String name = serverHandshake(connection);
                 if (!name.isEmpty()) {
