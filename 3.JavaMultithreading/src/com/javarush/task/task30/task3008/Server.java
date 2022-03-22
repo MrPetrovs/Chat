@@ -26,13 +26,23 @@ public class Server {
 
             if (message.getType() == MessageType.USER_NAME
                     && !userName.isEmpty()
-                    && !connectionMap.containsKey(userName))
-            {
+                    && !connectionMap.containsKey(userName)) {
                 connectionMap.put(userName, connection);
                 connection.send(new Message(MessageType.NAME_ACCEPTED));
                 return userName;
             } else {
                 return serverHandshake(connection);
+            }
+        }
+
+        private void notifyUsers(Connection connection, String userName) throws IOException {
+
+            for (Map.Entry<String, Connection> pair : connectionMap.entrySet()) {
+                String name = pair.getKey();
+                if (!name.equals(userName)) {
+                    Message message = new Message(MessageType.USER_ADDED, name);
+                    connection.send(message);
+                }
             }
         }
     }
