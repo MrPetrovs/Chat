@@ -53,9 +53,30 @@ public class Server {
                 if (messageReceived.getType() == MessageType.TEXT) {
                     Message messageToSend = new Message(MessageType.TEXT, userName + ": " + messageReceived.getData());
                     sendBroadcastMessage(messageToSend);
-                }else {
+                } else {
                     ConsoleHelper.writeMessage("Ошибка! Тип сообщения должен быть TEXT!");
                 }
+            }
+        }
+
+        public void run() {
+            ConsoleHelper.writeMessage(socket.getRemoteSocketAddress().toString());
+            try (Connection connection = new Connection(socket)) {
+
+                String name = serverHandshake(connection);
+                if (!name.isEmpty()) {
+                    sendBroadcastMessage(new Message(MessageType.USER_ADDED, name));
+                    notifyUsers(connection, name);
+                    serverMainLoop(connection, name);
+                    connectionMap.remove(name);
+                    sendBroadcastMessage(new Message(MessageType.USER_REMOVED, name));
+                }
+                sendBroadcastMessage(new Message(MessageType.USER_ADDED, name));
+                notifyUsers(connection, name);
+                serverMainLoop(connection, name);
+                ConsoleHelper.writeMessage("Соединение с удаленным адресом закрыто.");
+            } catch (IOException | ClassNotFoundException e) {
+                ConsoleHelper.writeMessage("Произошла ошибка при обмене данными с удаленным адресом.");
             }
         }
     }
