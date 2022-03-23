@@ -5,8 +5,8 @@ import com.javarush.task.task30.task3008.ConsoleHelper;
 import com.javarush.task.task30.task3008.Message;
 import com.javarush.task.task30.task3008.MessageType;
 
-import java.awt.*;
 import java.io.IOException;
+import java.net.Socket;
 
 public class Client {
     protected Connection connection;
@@ -60,6 +60,20 @@ public class Client {
                 } else {
                     throw new IOException("Unexpected MessageType");
                 }
+            }
+        }
+
+        public void run() {
+            String serverAddress = getServerAddress();
+            int serverPort = getServerPort();
+
+            try {
+                Socket socket = new Socket(serverAddress, serverPort);
+                Client.this.connection = new Connection(socket);
+                clientHandshake();
+                clientMainLoop();
+            } catch (IOException | ClassNotFoundException e) {
+                notifyConnectionStatusChanged(false);
             }
         }
     }
