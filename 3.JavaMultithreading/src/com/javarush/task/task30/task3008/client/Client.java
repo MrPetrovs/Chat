@@ -5,6 +5,7 @@ import com.javarush.task.task30.task3008.ConsoleHelper;
 import com.javarush.task.task30.task3008.Message;
 import com.javarush.task.task30.task3008.MessageType;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class Client {
@@ -29,6 +30,36 @@ public class Client {
             Client.this.clientConnected = clientConnected;
             synchronized (Client.this) {
                 Client.this.notify();
+            }
+        }
+
+        protected void clientHandshake() throws IOException, ClassNotFoundException {
+            while (true) {
+                Message receivedMessage = connection.receive();
+                if (receivedMessage.getType() == MessageType.NAME_REQUEST) {
+                    connection.send(new Message(MessageType.USER_NAME, getUserName()));
+                } else if (receivedMessage.getType() == MessageType.NAME_ACCEPTED) {
+                    notifyConnectionStatusChanged(true);
+                    return;
+                } else {
+                    throw new IOException("Unexpected MessageType");
+                }
+            }
+        }
+
+        protected void clientMainLoop() throws IOException, ClassNotFoundException {
+            while (true) {
+                Message receivedMessage = connection.receive();
+
+                if (receivedMessage.getType() == MessageType.TEXT) {
+                    processIncomingMessage(receivedMessage.getData());
+                } else if (receivedMessage.getType() == MessageType.USER_ADDED) {
+                    informAboutAddingNewUser(receivedMessage.getData());
+                } else if (receivedMessage.getType() == MessageType.USER_REMOVED) {
+                    informAboutDeletingNewUser(receivedMessage.getData());
+                } else {
+                    throw new IOException("Unexpected MessageType");
+                }
             }
         }
     }
@@ -77,7 +108,7 @@ public class Client {
         synchronized (this) {
             try {
                 wait();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 ConsoleHelper.writeMessage("Произошла ошибка во время ожидания.");
             }
         }
@@ -93,7 +124,7 @@ public class Client {
                 }
 
             }
-        }else {
+        } else {
             ConsoleHelper.writeMessage("Произошла ошибка во время работы клиента.");
         }
 
