@@ -1,5 +1,5 @@
 
-package com.javarush.task.task30.task3008;
+package com.javachat;
 
 import java.io.Closeable;
 import java.io.IOException;
